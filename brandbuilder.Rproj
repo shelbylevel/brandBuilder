@@ -1,0 +1,6 @@
+Version: 1.0
+RestoreWorkspace: No
+SaveWorkspace: No
+Encoding: UTF-8
+BuildType: Package
+PackageUseDevtools: Yes

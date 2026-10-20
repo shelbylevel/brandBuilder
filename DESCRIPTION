@@ -1,0 +1,12 @@
+Package: brandbuilder
+Title: Build Brand Files for Shiny and Quarto
+Version: 0.0.0.9000
+Authors@R: person("Shelby", "Level", role=c("aut","cre"), email="shelby@example.com")
+Description: Build and preview Bootswatch and brand.yml combinations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports: bslib, htmltools, shiny, yaml
+Suggests: testthat (>= 3.0.0), pkgload
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.1
