@@ -1,1 +1,1 @@
-.onLoad <- function(libname,pkgname) invisible(NULL)
+.onLoad <- function(libname, pkgname) invisible(NULL)

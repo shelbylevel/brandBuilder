@@ -1,4 +1,4 @@
-Package: brandbuilder
+Package: brandBuilder
 Title: Build Brand Files for Shiny and Quarto
 Version: 0.0.0.9000
 Authors@R: person("Shelby", "Level", role=c("aut","cre"), email="shelby@example.com")

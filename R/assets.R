@@ -1,7 +1,13 @@
 assets <- function() {
-  shiny::addResourcePath("brandbuilder-assets", system.file("assets", package="brandbuilder"))
+  shiny::addResourcePath(
+    "brandBuilder-assets",
+    system.file("assets", package = "brandBuilder")
+  )
   htmltools::tagList(
-    htmltools::tags$link(rel="stylesheet", href="brandbuilder-assets/app.css"),
-    htmltools::tags$script(src="brandbuilder-assets/app.js")
+    htmltools::tags$link(
+      rel = "stylesheet",
+      href = "brandBuilder-assets/app.css"
+    ),
+    htmltools::tags$script(src = "brandBuilder-assets/app.js")
   )
 }

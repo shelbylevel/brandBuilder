@@ -1,2 +1,2 @@
-pkgload::load_all(export_all=FALSE)
-brandbuilder::run_app()
+pkgload::load_all(export_all = FALSE)
+brandBuilder::run_app()

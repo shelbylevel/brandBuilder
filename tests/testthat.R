@@ -1,1 +1,3 @@
-library(testthat); library(brandbuilder); test_check("brandbuilder")
+library(testthat)
+library(brandBuilder)
+test_check("brandBuilder")

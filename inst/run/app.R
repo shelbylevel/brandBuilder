@@ -1,2 +1,2 @@
-library(brandbuilder)
-brandbuilder::run_app()
+library(brandBuilder)
+brandBuilder::run_app()

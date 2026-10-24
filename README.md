@@ -1,4 +1,4 @@
-# brandbuilder
+# brandBuilder
 
 A leprechaun-style Shiny app-package for building Bootswatch and `_brand.yml` combinations.
 
