@@ -1,0 +1,231 @@
+---
+title: "Restaurant Tipping"
+author: "Theme Demo"
+format:
+  html:
+    # theme: lux      # swap this out to preview a different Bootswatch theme
+    # brand: _brand.yml
+    # theme: lux
+    toc: true
+    toc-location: right
+    embed-resources: true
+    fig-width: 5
+    fig-height: 3.125
+execute:
+  warning: false
+  message: false
+  echo: false
+---
+
+```{r}
+#| label: setup
+
+library(tidyverse)
+library(gt)
+library(scales)
+library(showtext)
+# library(highcharter)
+
+# The classic tips dataset used by the original bslib theme demo app
+tips <- read_csv(
+  "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv",
+  show_col_types = FALSE
+) |>
+  mutate(
+    day = factor(day, levels = c("Thur", "Fri", "Sat", "Sun")),
+    time = factor(time, levels = c("Lunch", "Dinner")),
+    tip_pct = tip / total_bill
+  )
+```
+
+```{r}
+#| label: brand-theme
+
+# ---- Read _brand.yml (searches the project dir for it) ----------------------
+brand <- brand.yml::read_brand_yml()
+
+# Resolve a color: a palette name (e.g. "blue") -> hex, or pass a hex through
+palette <- brand$color$palette
+resolve_color <- function(x, default) {
+  if (is.null(x)) {
+    return(default)
+  }
+  if (!is.null(palette[[x]])) palette[[x]] else x
+}
+
+brand_cols <- list(
+  fg = resolve_color(brand$color$foreground, "#222222"),
+  bg = resolve_color(brand$color$background, "#FFFFFF"),
+  primary = resolve_color(brand$color$primary, "#2780E3"),
+  secondary = resolve_color(brand$color$secondary, "#6C757D"),
+  success = resolve_color(brand$color$success, "#3FB618"),
+  info = resolve_color(brand$color$info, "#9954BB"),
+  warning = resolve_color(brand$color$warning, "#FF7518"),
+  danger = resolve_color(brand$color$danger, "#FF0039")
+)
+
+# Categorical scale built from the brand's theme colors
+brand_discrete <- unname(unlist(
+  brand_cols[c("primary", "secondary", "success", "info", "warning", "danger")]
+))
+
+# ---- Fonts: use the brand's base font via Google Fonts if possible ----------
+base_family <- brand$typography$base$family
+if (!is.null(base_family)) {
+  try(sysfonts::font_add_google(base_family), silent = TRUE)
+  showtext_auto()
+  showtext_opts(dpi = 200)
+} else {
+  base_family <- ""
+}
+
+# ---- A ggplot theme that uses the brand ------------------------------------
+theme_brand <- function(base_size = 9) {
+  theme_minimal(base_size = base_size, base_family = base_family) +
+    theme(
+      text = element_text(color = brand_cols$fg),
+      plot.background = element_rect(fill = brand_cols$bg, color = NA),
+      panel.background = element_rect(fill = brand_cols$bg, color = NA),
+      panel.grid.major = element_line(color = alpha(brand_cols$fg, 0.12)),
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(color = brand_cols$fg),
+      axis.text = element_text(color = alpha(brand_cols$fg, 0.75)),
+      legend.title = element_blank(),
+      legend.position = "top",
+      legend.text = element_text(color = brand_cols$fg)
+    )
+}
+
+theme_set(theme_brand())
+update_geom_defaults("point", list(colour = brand_cols$primary))
+update_geom_defaults("smooth", list(colour = brand_cols$warning))
+```
+
+## Overview
+
+As bills grow larger, tips grow with them, but not perfectly proportionally —
+the curve flattens a little at the high end, suggesting the biggest checks
+don't always earn a tip that keeps pace percentage-wise.
+
+```{r}
+#| label: fig-bill-vs-tip
+#| fig-cap: "Total bill vs. tip, with a loess trend line"
+
+loess_fit <- loess(tip ~ total_bill, data = tips)
+loess_line <- tibble(
+  total_bill = seq(min(tips$total_bill), max(tips$total_bill), length.out = 100)
+) |>
+  mutate(tip = predict(loess_fit, total_bill))
+
+ggplot(tips, aes(total_bill, tip)) +
+  geom_point(size = 1.8, alpha = 0.6, color = brand_cols$primary) +
+  geom_smooth(
+    method = "loess",
+    formula = y ~ x,
+    se = FALSE,
+    color = brand_cols$warning,
+    linewidth = 1
+  ) +
+  scale_x_continuous(labels = label_dollar()) +
+  scale_y_continuous(labels = label_dollar()) +
+  labs(x = "Total bill ($)", y = "Tip ($)")
+
+# highchart() |>
+#   hc_add_series(
+#     tips,
+#     "scatter",
+#     hcaes(x = total_bill, y = tip),
+#     name = "Checks",
+#     marker = list(radius = 3, fillOpacity = 0.6)
+#   ) |>
+#   hc_add_series(
+#     loess_line,
+#     "line",
+#     hcaes(x = total_bill, y = tip),
+#     name = "Loess trend",
+#     marker = list(enabled = FALSE),
+#     enableMouseTracking = FALSE
+#   ) |>
+#   hc_xAxis(title = list(text = "Total bill ($)")) |>
+#   hc_yAxis(title = list(text = "Tip ($)"))
+```
+
+::: {.column-margin}
+
+```{r}
+#| label: tbl-tips-data
+#| tbl-cap: "First 10 recorded checks"
+
+tips |>
+  slice_head(n = 10) |>
+  select(total_bill, tip, sex, smoker, day, time, size) |>
+  gt() |>
+  fmt_currency(columns = c(total_bill, tip), decimals = 2) |>
+  cols_label(
+    total_bill = "Total bill",
+    tip = "Tip",
+    sex = "Sex",
+    smoker = "Smoker",
+    day = "Day",
+    time = "Time",
+    size = "Party size"
+  ) |>
+  # opt_table_font(font = google_font("Inter")) |>
+  tab_options(
+    table.width = pct(100),
+    column_labels.font.weight = "bold"
+  )
+```
+
+:::
+
+## Tip percentages by day
+
+How tip percentage is distributed across
+each day of the week:
+
+```{r}
+#| label: fig-tip-pct-ridge
+#| fig-cap: "Distribution of tip percentage by day"
+
+ggplot(tips, aes(tip_pct, fill = day, color = day)) +
+  geom_density(alpha = 0.4, linewidth = 0.6) +
+  scale_fill_manual(values = brand_discrete) +
+  scale_color_manual(values = brand_discrete) +
+  scale_x_continuous(labels = label_percent()) +
+  labs(x = "Tip percentage", y = "Density")
+
+# tip_densities <- tips |>
+#   group_by(day) |>
+#   group_modify(
+#     ~ {
+#       d <- density(.x$tip_pct, n = 256)
+#       tibble(x = d$x, y = d$y)
+#     }
+#   ) |>
+#   ungroup() |>
+#   mutate(day = as.character(day))
+
+# hc <- highchart() |>
+#   hc_xAxis(
+#     title = list(text = "Tip percentage"),
+#     labels = list(format = "{value:.0%}")
+#   ) |>
+#   hc_yAxis(title = list(text = "Density")) |>
+#   hc_plotOptions(
+#     areaspline = list(fillOpacity = 0.4, marker = list(enabled = FALSE))
+#   )
+
+# for (d in levels(tips$day)) {
+#   hc <- hc_add_series(
+#     hc,
+#     tip_densities |> filter(day == d),
+#     "areaspline",
+#     hcaes(x = x, y = y),
+#     name = d
+#   )
+# }
+
+# hc
+```
+

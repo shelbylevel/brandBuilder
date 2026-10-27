@@ -5,7 +5,12 @@ Authors@R: person("Shelby", "Level", role=c("aut","cre"), email="shelby@example.
 Description: Build and preview Bootswatch and brand.yml combinations.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: bslib, htmltools, shiny, yaml
+Imports: 
+    bslib,
+    htmltools,
+    quarto,
+    shiny,
+    yaml
 Suggests: testthat (>= 3.0.0), pkgload
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)

@@ -1,1 +1,31 @@
-.color-control{margin-bottom:.8rem}.color-control label{display:block;margin-bottom:.25rem}.color-row{display:grid;grid-template-columns:3rem 1fr;gap:.5rem}.color-row input[type=color]{width:3rem;height:2.4rem}.preview-frame{width:100%;height:calc(100vh - 9rem);min-height:620px;border:0;background:white}pre{white-space:pre-wrap}
+.color-control {
+    margin-bottom: .8rem
+}
+
+.color-control label {
+    display: block;
+    margin-bottom: .25rem
+}
+
+.color-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: .5rem
+}
+
+.color-row input[type=color] {
+    width: 3rem;
+    height: 2.4rem
+}
+
+.preview-frame {
+    width: 100%;
+    height: calc(100vh - 9rem);
+    min-height: 620px;
+    border: 0;
+    background: white
+}
+
+pre {
+    white-space: pre-wrap
+}
