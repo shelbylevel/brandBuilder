@@ -20,14 +20,28 @@ execute:
 ```{r}
 #| label: setup
 
-library(tidyverse)
-library(gt)
+library(dplyr)
+library(ggplot2)
 library(scales)
-library(showtext)
+# library(showtext)
+library(gt)
 # library(highcharter)
 
+# knitr::knit_hooks$set(time_it = local({
+#   start <- NULL
+#   function(before, options) {
+#     if (before) {
+#       start <<- Sys.time()
+#     } else {
+#       message(sprintf("[chunk %s] %.2fs", options$label,
+#                       as.numeric(Sys.time() - start, units = "secs")))
+#     }
+#   }
+# }))
+# knitr::opts_chunk$set(time_it = TRUE)
+
 # The classic tips dataset used by the original bslib theme demo app
-tips <- read_csv(
+tips <- readr::read_csv(
   "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv",
   show_col_types = FALSE
 ) |>
@@ -73,8 +87,8 @@ brand_discrete <- unname(unlist(
 base_family <- brand$typography$base$family
 if (!is.null(base_family)) {
   try(sysfonts::font_add_google(base_family), silent = TRUE)
-  showtext_auto()
-  showtext_opts(dpi = 200)
+  # showtext_auto()
+  # showtext_opts(dpi = 200)
 } else {
   base_family <- ""
 }
