@@ -1,28 +1,4 @@
-system_fonts <- c("Arial", "monospace", "sans-serif", "serif")
-
-# Google font -> bslib font (linked, not downloaded); system font -> as-is
-font_arg <- function(f) {
-  if (f %in% system_fonts) f else bslib::font_google(f, local = FALSE)
-}
-
-# bslib theme built from the app's current brand state
-brand_theme <- function(x) {
-  args <- list(
-    version = 5,
-    bg = x$background,
-    fg = x$foreground,
-    primary = x$primary,
-    secondary = x$secondary,
-    base_font = font_arg(x$base),
-    heading_font = font_arg(x$headings),
-    code_font = font_arg(x$mono),
-    "headings-font-weight" = 600
-  )
-  if (!identical(x$bootswatch, "default")) {
-    args$bootswatch <- x$bootswatch
-  }
-  do.call(bslib::bs_theme, args)
-}
+# (system_fonts, font_arg() and brand_theme() live in theme.R)
 
 # ggplot theme using the brand colors (same idea as the Quarto report)
 theme_brand_app <- function(x, base_size = 11) {

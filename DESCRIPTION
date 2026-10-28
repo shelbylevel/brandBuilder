@@ -8,7 +8,7 @@ Encoding: UTF-8
 Imports:
     base64enc,
     bsicons,
-    bslib,
+    bslib (>= 0.9.0),
     ggplot2,
     htmltools,
     quarto,

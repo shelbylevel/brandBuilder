@@ -1,14 +1,18 @@
 `%||%` <- function(x, y) if (is.null(x) || !length(x)) y else x
+# Current brand state: the sidebar values, falling back to the selected
+# Bootswatch's own values for anything the browser hasn't sent yet.
 brand_state <- function(input) {
+  bs <- input$bootswatch %||% DEFAULT_BOOTSWATCH
+  d <- bootswatch_defaults(bs)
   list(
-    bootswatch = input$bootswatch %||% "flatly",
-    background = input$background_value %||% "#FFFFFF",
-    foreground = input$foreground_value %||% "#212529",
-    primary = input$primary_value %||% "#2C6E9B",
-    secondary = input$secondary_value %||% "#6C757D",
-    base = input$base_font %||% "Figtree",
-    headings = input$heading_font %||% "Source Sans 3",
-    mono = input$code_font %||% "JetBrains Mono"
+    bootswatch = bs,
+    background = input$background_value %||% d$background,
+    foreground = input$foreground_value %||% d$foreground,
+    primary = input$primary_value %||% d$primary,
+    secondary = input$secondary_value %||% d$secondary,
+    base = input$base_font %||% d$base,
+    headings = input$heading_font %||% d$headings,
+    mono = input$code_font %||% d$mono
   )
 }
 brand_yaml <- function(x) {
@@ -22,9 +26,9 @@ brand_yaml <- function(x) {
     ),
     typography = list(
       fonts = list(
-        list(family = x$base, source = "google"),
-        list(family = x$headings, source = "google"),
-        list(family = x$mono, source = "google")
+        list(family = x$base, source = font_source(x$base)),
+        list(family = x$headings, source = font_source(x$headings)),
+        list(family = x$mono, source = font_source(x$mono))
       ),
       base = x$base,
       headings = list(family = x$headings, weight = 600),

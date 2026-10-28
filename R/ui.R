@@ -42,6 +42,10 @@ color_control <- function(id, label, value) {
   )
 }
 app_ui <- function(request) {
+  # Controls start at the default Bootswatch's own values; picking another
+  # Bootswatch updates them (see app_server()).
+  d <- bootswatch_defaults(DEFAULT_BOOTSWATCH)
+
   bslib::page_navbar(
     title = "Brand Builder",
     theme = brand_theme(brand_state(list())),
@@ -54,33 +58,36 @@ app_ui <- function(request) {
         "bootswatch",
         "Bootswatch foundation",
         choices,
-        "flatly"
+        DEFAULT_BOOTSWATCH
       ),
       bslib::accordion(
         open = c("Colors", "Typography"),
         bslib::accordion_panel(
           "Colors",
-          color_control("background", "Background", "#FFFFFF"),
-          color_control("foreground", "Foreground", "#212529"),
-          color_control("primary", "Primary", "#2C6E9B"),
-          color_control("secondary", "Secondary", "#6C757D")
+          color_control("background", "Background", d$background),
+          color_control("foreground", "Foreground", d$foreground),
+          color_control("primary", "Primary", d$primary),
+          color_control("secondary", "Secondary", d$secondary)
         ),
         bslib::accordion_panel(
           "Typography",
           shiny::selectInput(
             "base_font",
             "Base font",
-            c("Arial", "Figtree", "Inter", "Open Sans")
+            font_choices(base_fonts, d$base),
+            d$base
           ),
           shiny::selectInput(
             "heading_font",
             "Heading font",
-            c("Source Sans 3", "Figtree", "Inter")
+            font_choices(heading_fonts, d$headings),
+            d$headings
           ),
           shiny::selectInput(
             "code_font",
             "Code font",
-            c("JetBrains Mono", "Fira Code", "monospace")
+            font_choices(code_fonts, d$mono),
+            d$mono
           )
         )
       ),

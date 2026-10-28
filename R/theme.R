@@ -1,26 +1,71 @@
-system_fonts <- c("Arial", "monospace", "sans-serif", "serif")
+system_fonts <- c(
+  "Arial",
+  "Helvetica",
+  "Helvetica Neue",
+  "Segoe UI",
+  "system-ui",
+  "SFMono-Regular",
+  "Menlo",
+  "Monaco",
+  "Consolas",
+  "Courier New",
+  "monospace",
+  "sans-serif",
+  "serif"
+)
+
+is_system_font <- function(f) f %in% system_fonts
+
+# brand.yml `source` for a font
+font_source <- function(f) if (is_system_font(f)) "system" else "google"
 
 # Google font -> bslib font (linked, not downloaded); system font -> as-is
 font_arg <- function(f) {
-  if (f %in% system_fonts) f else bslib::font_google(f, local = FALSE)
+  if (is_system_font(f)) f else bslib::font_google(f, local = FALSE)
 }
 
-# bslib theme built from the app's current brand state
+# bslib theme built from the app's current brand state.
+#
+# Like bs_themer(), only values that differ from the selected Bootswatch's own
+# are passed to bs_theme(). Untouched controls leave the Bootswatch exactly as
+# its author designed it, and edits are layered on top.
 brand_theme <- function(x) {
-  args <- list(
-    version = 5,
-    bg = x$background,
-    fg = x$foreground,
-    primary = x$primary,
-    secondary = x$secondary,
-    base_font = font_arg(x$base),
-    heading_font = font_arg(x$headings),
-    code_font = font_arg(x$mono),
-    "headings-font-weight" = 600
-  )
+  d <- bootswatch_defaults(x$bootswatch)
+  same_color <- function(a, b) identical(toupper(a), toupper(b))
+
+  args <- list(version = 5, brand = FALSE, "headings-font-weight" = 600)
   if (!identical(x$bootswatch, "default")) {
     args$bootswatch <- x$bootswatch
   }
+
+  # bs_theme() needs bg and fg together when either one changes
+  if (
+    !same_color(x$background, d$background) ||
+      !same_color(x$foreground, d$foreground)
+  ) {
+    args$bg <- x$background
+    args$fg <- x$foreground
+  }
+  if (!same_color(x$primary, d$primary)) {
+    args$primary <- x$primary
+  }
+  if (!same_color(x$secondary, d$secondary)) {
+    args$secondary <- x$secondary
+  }
+
+  base_changed <- !identical(x$base, d$base)
+  if (base_changed) {
+    args$base_font <- font_arg(x$base)
+  }
+  # Many Bootswatches leave the heading font unset, so headings follow the base
+  # font. Pin it to what the Heading font control shows once either changes.
+  if (base_changed || !identical(x$headings, d$headings)) {
+    args$heading_font <- font_arg(x$headings)
+  }
+  if (!identical(x$mono, d$mono)) {
+    args$code_font <- font_arg(x$mono)
+  }
+
   do.call(bslib::bs_theme, args)
 }
 
