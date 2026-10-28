@@ -26,22 +26,9 @@ library(scales)
 library(gt)
 # library(highcharter)
 
-# knitr::knit_hooks$set(time_it = local({
-#   start <- NULL
-#   function(before, options) {
-#     if (before) {
-#       start <<- Sys.time()
-#     } else {
-#       message(sprintf("[chunk %s] %.2fs", options$label,
-#                       as.numeric(Sys.time() - start, units = "secs")))
-#     }
-#   }
-# }))
-# knitr::opts_chunk$set(time_it = TRUE)
-
 # The classic tips dataset used by the original bslib theme demo app
 tips <- readr::read_csv(
-  "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv",
+  "data/tips.csv",
   show_col_types = FALSE
 ) |>
   mutate(
