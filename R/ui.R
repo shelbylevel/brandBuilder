@@ -44,7 +44,7 @@ color_control <- function(id, label, value) {
 app_ui <- function(request) {
   bslib::page_navbar(
     title = "Brand Builder",
-    theme = bslib::bs_theme(bootswatch = "litera"),
+    theme = brand_theme(brand_state(list())),
     header = assets(),
     sidebar = bslib::sidebar(
       width = 350,
@@ -91,6 +91,7 @@ app_ui <- function(request) {
         shiny::downloadButton("download_kit", "Download starter kit")
       )
     ),
+    bslib::nav_panel("Dashboard", dashboard_ui("tips")),
     !!!preview_ui("preview")
   )
 }

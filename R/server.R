@@ -1,5 +1,12 @@
 app_server <- function(input, output, session) {
   brand <- shiny::reactive(brand_state(input))
+  brand_slow <- shiny::debounce(brand, millis = 600)
+  dashboard_server("tips", brand_slow)
+  shiny::observeEvent(
+    brand_slow(),
+    session$setCurrentTheme(brand_theme(brand_slow())),
+    ignoreInit = TRUE
+  )
   preview_server("preview", brand)
   shiny::observeEvent(input$reset, {
     shiny::updateSelectInput(session, "bootswatch", selected = "flatly")

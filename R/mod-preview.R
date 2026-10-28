@@ -1,7 +1,6 @@
 preview_ui <- function(id) {
   ns <- shiny::NS(id)
   list(
-    bslib::nav_panel("Shiny preview", shiny::uiOutput(ns("shiny"))),
     bslib::nav_panel("Quarto preview", shiny::uiOutput(ns("quarto"))),
     bslib::nav_panel(
       "Brand YAML",
@@ -16,16 +15,13 @@ preview_ui <- function(id) {
 }
 preview_server <- function(id, brand) {
   shiny::moduleServer(id, function(input, output, session) {
-
-    # --- Scratch directory - one per session ------------------------------
+    # --- Scratch dir, one per session -----------------------------------
     work_dir <- tempfile("brand-preview-")
     dir.create(work_dir)
     work_dir <- normalizePath(work_dir)
 
     quarto_dir <- file.path(work_dir, "quarto")
-    shiny_dir <- file.path(work_dir, "shiny")
     dir.create(quarto_dir)
-    dir.create(shiny_dir)
 
     # copy the whole template folder (index.qmd, data/tips.csv, ...)
     template_dir <- system.file("quarto-report", package = "brandBuilder")
@@ -42,28 +38,9 @@ preview_server <- function(id, brand) {
 
     # wait for the user to pause before re-rendering
     brand_slow <- shiny::debounce(brand, millis = 800)
-    shiny_n <- 0
     render_n <- 0
 
-    # --- Shiny Dashboard -------------------------------------------------
-    shiny_url <- shiny::reactive({
-      x <- brand_slow()
-      shiny::withProgress(message = "Building Shiny preview...", {
-        write_shiny_preview(x, shiny_dir)
-      })
-      shiny_n <<- shiny_n + 1
-      sprintf("%s/shiny/index.html?v=%d", prefix, shiny_n)
-    })
-
-    output$shiny <- shiny::renderUI(
-      htmltools::tags$iframe(
-        class = "preview-frame",
-        title = "Shiny preview",
-        src = shiny_url()
-      )
-    )
-
-    # --- Quarto Report ----------------------------------------------------
+    # --- Quarto report ---------------------------------------------------
     report_url <- shiny::reactive({
       x <- brand_slow()
       swatch <- x$bootswatch %||% "flatly"
@@ -104,7 +81,7 @@ preview_server <- function(id, brand) {
         src = report_url()
       )
     )
-    
+
     output$yaml <- shiny::renderText(brand_yaml(brand()))
     output$a11y <- shiny::renderUI({
       x <- brand()
