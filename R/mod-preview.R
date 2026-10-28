@@ -28,26 +28,31 @@ preview_server <- function(id, brand) {
     dir.create(work_dir)
     work_dir <- normalizePath(work_dir)
 
-    template <- system.file("quarto-report/index.qmd", package = "brandBuilder")
-    stopifnot(nzchar(template), file.copy(template, work_dir))
+    # copy the whole template folder (index.qmd, data/tips.csv, ...)
+    template_dir <- system.file("quarto-report", package = "brandBuilder")
+    stopifnot(nzchar(template_dir))
+    file.copy(
+      list.files(template_dir, full.names = TRUE),
+      work_dir,
+      recursive = TRUE
+    )
 
     session$onSessionEnded(function() unlink(work_dir, recursive = TRUE))
 
     # wait for the user to pause before re-rendering
     brand_slow <- shiny::debounce(brand, millis = 800)
 
-    report_html <- shiny::reactive({
+    prefix <- paste0("brand-preview-", session$token)
+    shiny::addResourcePath(prefix, work_dir)
+    render_n <- 0
+
+    report_url <- shiny::reactive({
       x <- brand_slow()
       swatch <- x$bootswatch %||% "flatly"
 
       writeLines(brand_yaml(x), file.path(work_dir, "_brand.yml"))
       writeLines(
-        c(
-          "format:",
-          "  html:",
-          sprintf("    theme: [%s, brand]", swatch),
-          "    embed-resources: true"
-        ),
+        c("format:", "  html:", sprintf("    theme: [%s, brand]", swatch)),
         file.path(work_dir, "_quarto.yml")
       )
 
@@ -55,13 +60,9 @@ preview_server <- function(id, brand) {
       unlink(out)
 
       shiny::withProgress(message = "Rendering report...", {
-        tictoc::tic("report render")
         tryCatch(
           quarto::quarto_render(
             file.path(work_dir, "index.qmd"),
-            execute_params = list(
-              brand_path = file.path(work_dir, "_brand.yml")
-            ),
             quiet = FALSE
           ),
           error = function(e) {
@@ -71,19 +72,20 @@ preview_server <- function(id, brand) {
             )
           }
         )
-        t <- tictoc::toc(quiet = TRUE)
-        message(sprintf("Render took %.1fs", t$toc - t$tic))
       })
 
       shiny::req(file.exists(out))
-      paste(readLines(out, warn = FALSE), collapse = "\n")
+      render_n <<- render_n + 1
+      sprintf("%s/index.html?v=%d", prefix, render_n)
     })
 
-    output$quarto <- shiny::renderUI(htmltools::tags$iframe(
-      class = "preview-frame",
-      title = "Quarto preview",
-      srcdoc = report_html()
-    ))
+    output$quarto <- shiny::renderUI(
+      htmltools::tags$iframe(
+        class = "preview-frame",
+        title = "Quarto preview",
+        src = report_url()
+      )
+    )
     output$yaml <- shiny::renderText(brand_yaml(brand()))
     output$a11y <- shiny::renderUI({
       x <- brand()

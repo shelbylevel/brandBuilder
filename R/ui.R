@@ -70,7 +70,7 @@ app_ui <- function(request) {
           shiny::selectInput(
             "base_font",
             "Base font",
-            c("Figtree", "Inter", "Open Sans", "Arial")
+            c("Arial", "Figtree", "Inter", "Open Sans")
           ),
           shiny::selectInput(
             "heading_font",

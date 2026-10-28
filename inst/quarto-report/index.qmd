@@ -8,7 +8,6 @@ format:
     # theme: lux
     toc: true
     toc-location: right
-    embed-resources: true
     fig-width: 5
     fig-height: 3.125
 execute:
